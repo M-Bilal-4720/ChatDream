@@ -27,12 +27,13 @@ Broadcast::channel('chatboard.{sender_id}.{receiver_id}', function ($user, $send
 });
 
 Broadcast::channel('group.{group_id}', function ($user, $group_id) {
-    if (!auth()->check()) {
-        return false;
-    }
-
     return $user->groups()->where('group_id', $group_id)->exists();
 });
+Broadcast::channel('deletechat.{userId}.{friendId}', function ($user, $userId, $friendId) {
+    // Validate that the user is either the sender or the receiver
+    return $user->id == $userId || $user->id == $friendId;
+});
+
 
 
 

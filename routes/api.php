@@ -24,14 +24,17 @@ Route::middleware('auth:user')->group(function () {
     Route::get('/users', [AuthController::class, 'getUser']);
     Route::get('/live-users', [AuthController::class, 'getliveUser']);
     Route::post('/user/active/status', [AuthController::class, 'updateStatus']);
+    Route::get('/user/not/friends',[FriendController::class, 'usersNotInFriendList']);
     //friends
     Route::get('/friends', [FriendController::class, 'getFriends']);
     Route::post('/friends/add', [FriendController::class, 'addFriend']);
-    Route::delete('/friends/remove', [FriendController::class, 'deleteFriend']);
+    Route::delete('/friends/remove/{id}', [FriendController::class, 'deleteFriend']);
     //Messages
     Route::get('/messages/{friendId}', [MessageController::class, 'getMessages']);
     Route::post('/message/send', [MessageController::class, 'sendMessage']);
     Route::post('/message/send1', [MessageController::class, 'sendMessage1']);
+    Route::post('/messages/mark/as/read', [MessageController::class, 'messageRead']);
+    Route::delete('/messages/delete/{id}', [MessageController::class, 'deleteMessage']);
     //profile
     Route::post('/update/profile', [AuthController::class, 'updateProfile']);
     Route::post('/update/profile/image', [AuthController::class, 'updateProfileImage']);
@@ -41,6 +44,7 @@ Route::middleware('auth:user')->group(function () {
     Route::get('/get/user/groups', [GroupController::class, 'userGroup']);
     Route::post('/user/group/adduser/{id}', [GroupController::class, 'addUserToGroup']);
 //Group Messages
+
     Route::get('/group/messages/{id}', [GroupMessagesController::class, 'fetchGroupMessages']);
     Route::post('/group/message/sent',[GroupMessagesController::class, 'sendMessage']);
 Route::get('/group/users/{id}',[GroupController::class, 'getGroupUser']);

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Friend;
 use App\Models\Message;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -62,9 +63,15 @@ if($data){
                     })
                     ->orderBy('created_at', 'desc')
                     ->first();
+                $unreadMessage = DB::table('messages')
+                    ->Where(function ($query) use ($userId, $friend) {
+                        $query->where('receiver_id', $userId)
+                            ->where('sender_id', $friend->friend_id)->where('is_read', Message::UNREAD);
+                    })->count();
 
                 // Add last message details to the friend object
                 $friend->messages = $lastMessage;
+                $friend->unread_message = $unreadMessage;
                 $friend->last_message_date = $lastMessage ? $lastMessage->created_at : null;
 
                 return $friend;
@@ -73,6 +80,25 @@ if($data){
             ->values(); // Reindex the collection
 
         return response()->json(['status'=>true,'message'=>'your friends','friends'=>$friends],200);
+    }
+
+    function usersNotInFriendList(Request $request)
+    {
+        $search = $request->query('search');
+        $myUserId = Auth::guard('user')->user()->id;
+
+        $usersNotInList = User::whereNotIn('id', function ($query) use ($myUserId) {
+            $query->select('friend_id')
+                ->from('friends')
+                ->where('user_id', $myUserId);
+        })
+            ->where('id', '!=', $myUserId)
+            ->where(function ($query) use ($search) {
+                $query->where('name', 'like', "%{$search}%")
+                    ->orWhere('phone', 'like', "%{$search}%");
+            })
+            ->get();
+        return response()->json(['status' => true, 'message' => 'All users not in friends list', 'user' => $usersNotInList,], 200);
     }
 
     public function deleteFriend(Request $request ,$id){

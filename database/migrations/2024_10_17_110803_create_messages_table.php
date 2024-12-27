@@ -18,6 +18,9 @@ return new class extends Migration
             $table->string('type');
             $table->string('file_name')->nullable();
             $table->text('message');
+            $table->boolean('is_read')->default(0);
+            $table->boolean('is_deleted_by_sender')->default(0);
+            $table->boolean('is_deleted_by_receiver')->default(0);
             $table->timestamps();
 
             $table->foreign('sender_id')->references('id')->on('users');
